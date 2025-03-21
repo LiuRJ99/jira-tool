@@ -1,0 +1,6 @@
+{
+    "defaultRole": {
+        "path": ".\\prompts\\roles\\trae.md",
+        "enabled": true
+    }
+}
