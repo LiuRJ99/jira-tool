@@ -8,15 +8,9 @@ const jiraStore = useJiraStore();
 const router = useRouter();
 const issueInput = ref('');
 
-// 在组件加载时检查配置
+// 在组件加载时初始化
 onMounted(() => {
-  // 尝试加载配置
-  jiraStore.loadConfig();
-  
-  // 如果未配置，跳转到配置页面
-  if (!jiraStore.isConfigured.value) {
-    router.push('/config');
-  }
+  // 组件加载时不需要额外处理，全局导航守卫已经处理了路由跳转逻辑
 });
 
 // 处理查询

@@ -31,10 +31,7 @@ onMounted(() => {
     protocol.value = config.protocol || 'https';
     apiVersion.value = config.apiVersion || '2';
     
-    // 如果已配置，跳转到主页
-    if (jiraStore.isConfigured.value) {
-      router.push('/');
-    }
+    // 路由跳转由全局导航守卫处理
   }
 });
 
@@ -81,9 +78,11 @@ async function handleSubmit() {
       protocol: protocol.value,
       apiVersion: apiVersion.value
     });
-    
     if (success) {
-      router.push('/');
+      // 添加短暂延迟，确保状态更新后再触发导航
+      setTimeout(() => {
+        router.push('/');
+      }, 100);
     }
   } finally {
     isSubmitting.value = false;
@@ -240,4 +239,4 @@ button:disabled {
   background-color: #d9d9d9;
   cursor: not-allowed;
 }
-</style> 
+</style>
