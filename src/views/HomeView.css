@@ -24,7 +24,15 @@
   .authors-container {
     display: flex;
     flex-wrap: wrap;
-    gap: 12px;
+    gap: 8px;
+    margin-bottom: 20px;
+  }
+  
+  .keywords-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 20px;
   }
   
   .author-item {
@@ -238,6 +246,25 @@
     background-color: #f8f8f8;
     border-radius: 8px;
     color: #595959;
+  }
+  
+  .keyword-item {
+    background-color: #f0f0f0;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 4px 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+  
+  .keyword-item:hover {
+    background-color: #e0e0e0;
+  }
+  
+  .keyword-item-selected {
+    background-color: #4CAF50;
+    color: white;
+    border-color: #45a049;
   }
   
   /* 移动端样式 */

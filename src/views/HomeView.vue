@@ -2,12 +2,13 @@
 import { ref, onMounted, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { useJiraStore } from '@/stores/jira';
-import { CommentType, CommentTypeDisplayNames,DescriptionKeywords } from '@/services/jira.service';
+import { CommentType, CommentTypeDisplayNames, DescriptionKeywords, CommentTypeKeywords } from '@/services/jira.service';
 
 const jiraStore = useJiraStore();
 const router = useRouter();
 const issueInput = ref('');
 const selectedAuthors = ref<string[]>([]);
+const selectedKeywords = ref<string[]>([]);
 
 // 切换作者选中状态
 function toggleAuthor(authorName: string) {
@@ -19,15 +20,45 @@ function toggleAuthor(authorName: string) {
   }
 }
 
-// 根据选中的作者过滤评论
-function filterCommentsByAuthor(comments: string[]) {
-  if (selectedAuthors.value.length === 0) return comments;
-  return comments.filter(comment => 
-    selectedAuthors.value.some(author => comment.startsWith(`[${author}]`))
-  );
+// 切换关键字选中状态
+function toggleKeyword(keyword: string) {
+  const index = selectedKeywords.value.indexOf(keyword);
+  if (index === -1) {
+    selectedKeywords.value.push(keyword);
+  } else {
+    selectedKeywords.value.splice(index, 1);
+  }
 }
 
+// 获取所有关键字列表
+const allKeywords = computed(() => {
+  const keywords: string[] = [];
+  Object.values(CommentTypeKeywords).forEach(keywordArray => {
+    keywords.push(...keywordArray);
+  });
+  return [...new Set(keywords)];
+});
 
+// 根据选中的作者和关键字过滤评论
+function filterComments(comments: string[]) {
+  let filteredComments = comments;
+  
+  // 按作者筛选
+  if (selectedAuthors.value.length > 0) {
+    filteredComments = filteredComments.filter(comment => 
+      selectedAuthors.value.some(author => comment.startsWith(`[${author}]`))
+    );
+  }
+  
+  // 按关键字筛选
+  if (selectedKeywords.value.length > 0) {
+    filteredComments = filteredComments.filter(comment =>
+      selectedKeywords.value.some(keyword => comment.includes(keyword))
+    );
+  }
+  
+  return filteredComments;
+}
 
 // 在组件加载时初始化
 onMounted(async () => {
@@ -110,6 +141,19 @@ function openJiraPage(url: string) {
           <span class="author-name">{{ author.name }}</span>
         </div>
       </div>
+
+      <h3>关键字筛选</h3>
+      <div class="keywords-container">
+        <div 
+            class="keyword-item" 
+            v-for="keyword in allKeywords" 
+            :key="keyword"
+            @click="toggleKeyword(keyword)"
+            :class="{ 'keyword-item-selected': selectedKeywords.includes(keyword) }"
+          >
+          {{ keyword }}
+        </div>
+      </div>
     </div>
     
     <div class="query-section">
@@ -154,7 +198,7 @@ function openJiraPage(url: string) {
           <tr v-for="issue in jiraStore.issueResults" :key="issue.key">
             <td>{{ issue.key }}</td>
             <td>
-              <div v-for="(comment, index) in filterCommentsByAuthor(issue.comments[CommentType.TEST])" :key="index" class="comment-item">
+              <div v-for="(comment, index) in filterComments(issue.comments[CommentType.TEST])" :key="index" class="comment-item">
                 <span class="author-dot" 
                       v-for="author in issue.commentAuthors.filter(a => comment.startsWith(`[${a.name}]`))" 
                       :key="author.name"
@@ -167,7 +211,7 @@ function openJiraPage(url: string) {
               </div>
             </td>
             <td>
-              <div v-for="(comment, index) in filterCommentsByAuthor(issue.comments[CommentType.REVIEW])" :key="index" class="comment-item">
+              <div v-for="(comment, index) in filterComments(issue.comments[CommentType.REVIEW])" :key="index" class="comment-item">
                 <span class="author-dot" 
                       v-for="author in issue.commentAuthors.filter(a => comment.startsWith(`[${a.name}]`))" 
                       :key="author.name"
@@ -180,7 +224,7 @@ function openJiraPage(url: string) {
               </div>
             </td>
             <td>
-              <div v-for="(comment, index) in filterCommentsByAuthor(issue.comments[CommentType.APPROVAL])" :key="index" class="comment-item">
+              <div v-for="(comment, index) in filterComments(issue.comments[CommentType.APPROVAL])" :key="index" class="comment-item">
                 <span class="author-dot" 
                       v-for="author in issue.commentAuthors.filter(a => comment.startsWith(`[${a.name}]`))" 
                       :key="author.name"
@@ -193,7 +237,7 @@ function openJiraPage(url: string) {
               </div>
             </td>
             <td>
-              <div v-for="(comment, index) in filterCommentsByAuthor(issue.comments[CommentType.VERIFICATION])" :key="index" class="comment-item">
+              <div v-for="(comment, index) in filterComments(issue.comments[CommentType.VERIFICATION])" :key="index" class="comment-item">
                 <span class="author-dot" 
                       v-for="author in issue.commentAuthors.filter(a => comment.startsWith(`[${a.name}]`))" 
                       :key="author.name"
