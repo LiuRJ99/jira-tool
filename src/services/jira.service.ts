@@ -36,6 +36,9 @@ export const CommentTypeDisplayNames: Record<CommentType, string> = {
   [CommentType.VERIFICATION]: '验证'
 };
 
+// 增加描述关键字检查：问题描述、原因分析、解决方案
+export const DescriptionKeywords = ['问题描述', '原因分析', '解决方案'];
+
 // JIRA工单信息接口
 export interface JiraIssueInfo {
   key: string;
@@ -157,22 +160,30 @@ export class JiraService {
 
     const results: JiraIssueInfo[] = [];
     const colors = [
-      '#E74C3C', // 鲜红色
-      '#3498DB', // 明亮蓝色
-      '#2ECC71', // 翠绿色
-      '#9B59B6', // 紫色
-      '#F1C40F', // 亮黄色
-      '#1ABC9C', // 青绿色
-      '#E67E22', // 橙色
-      '#34495E', // 深蓝灰色
-      '#27AE60', // 深绿色
-      '#8E44AD', // 深紫色
-      '#D35400', // 深橙色
-      '#16A085', // 深青色
-      '#C0392B', // 深红色
-      '#2980B9', // 深蓝色
-      '#F39C12', // 金色
-      '#2C3E50'  // 靛蓝色
+      '#FF0000', // 纯红色
+      '#00FF00', // 纯绿色
+      '#0000FF', // 纯蓝色
+      '#FFFF00', // 黄色
+      '#FF00FF', // 品红色
+      '#00FFFF', // 青色
+      '#FF8000', // 橙色
+      '#FF0080', // 玫红色
+      '#80FF00', // 黄绿色
+      '#00FF80', // 青绿色
+      '#8000FF', // 紫色
+      '#0080FF', // 天蓝色
+      '#FF4040', // 亮红色
+      '#40FF40', // 亮绿色
+      '#4040FF', // 亮蓝色
+      '#FFFF40', // 亮黄色
+      '#FF40FF', // 亮粉色
+      '#40FFFF', // 亮青色
+      '#804000', // 棕色
+      '#008040', // 深绿色
+      '#000080', // 深蓝色
+      '#408080', // 灰青色
+      '#804080', // 暗紫色
+      '#808040'  // 橄榄色
     ];
 
     // 创建全局的commentAuthors集合

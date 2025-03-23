@@ -2,7 +2,7 @@
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useJiraStore } from '@/stores/jira';
-import { CommentType, CommentTypeDisplayNames } from '@/services/jira.service';
+import { CommentType, CommentTypeDisplayNames,DescriptionKeywords } from '@/services/jira.service';
 
 const jiraStore = useJiraStore();
 const router = useRouter();
@@ -171,14 +171,15 @@ function openJiraPage(url: string) {
               </div>
             </td>
             <td>
-              <a 
+                <a 
                 href="#" 
                 @click.prevent="openJiraPage(issue.descriptionUrl)"
                 class="description-link"
                 :title="issue.description"
-              >
+                :class="{ 'warning-text': issue.description && !DescriptionKeywords.some(keyword => issue.description.includes(keyword)) }"
+                >
                 {{ issue.description ? '查看描述' : '无描述' }}
-              </a>
+                </a>
             </td>
           </tr>
         </tbody>
@@ -408,6 +409,10 @@ h2 {
 
 .description-link:hover {
   text-decoration: underline;
+}
+
+.warning-text {
+  color: #ff4d4f !important; /* 使用红色，!important确保样式优先级 */
 }
 
 .empty-state {
