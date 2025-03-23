@@ -162,73 +162,107 @@ async function handleSubmit() {
 
 <style scoped>
 .config-container {
-  max-width: 500px;
+  width: 100%;
+  max-width: 800px;
   margin: 0 auto;
   padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 h1 {
   text-align: center;
-  margin-bottom: 30px;
+  margin-bottom: 40px;
+  font-size: 28px;
+  color: #262626;
 }
 
 .config-form {
-  background-color: #f8f8f8;
-  padding: 20px;
+  background-color: #fff;
+  padding: 40px;
   border-radius: 8px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto;
 }
 
 .form-group {
-  margin-bottom: 15px;
+  margin-bottom: 28px;
 }
 
 label {
   display: block;
-  margin-bottom: 5px;
-  font-weight: bold;
+  margin-bottom: 8px;
+  font-weight: 600;
+  color: #333;
 }
 
 input, select {
   width: 100%;
-  padding: 10px;
-  border: 1px solid #ddd;
+  padding: 12px;
+  border: 1px solid #d9d9d9;
   border-radius: 4px;
   font-size: 16px;
+  transition: all 0.3s;
+}
+
+input:hover, select:hover {
+  border-color: #40a9ff;
+}
+
+input:focus, select:focus {
+  border-color: #1890ff;
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
 }
 
 input.has-error {
   border-color: #ff4d4f;
+  animation: shake 0.5s;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  75% { transform: translateX(5px); }
 }
 
 .error-text {
   color: #ff4d4f;
   font-size: 14px;
-  margin-top: 5px;
+  margin-top: 8px;
 }
 
 .error-message {
+  margin-bottom: 30px;
+  padding: 15px;
   background-color: #fff2f0;
   border: 1px solid #ffccc7;
-  color: #ff4d4f;
-  padding: 10px;
   border-radius: 4px;
-  margin-bottom: 20px;
+  color: #ff4d4f;
+  font-size: 14px;
+  width: 100%;
+  max-width: 600px;
 }
 
 .form-actions {
-  margin-top: 20px;
   text-align: center;
+  margin-top: 40px;
 }
 
 button {
+  min-width: 160px;
   background-color: #1890ff;
   color: white;
   border: none;
-  padding: 10px 20px;
-  border-radius: 4px;
+  padding: 14px 32px;
+  border-radius: 6px;
   cursor: pointer;
   font-size: 16px;
+  font-weight: 500;
+  transition: all 0.3s;
 }
 
 button:hover {
@@ -238,5 +272,66 @@ button:hover {
 button:disabled {
   background-color: #d9d9d9;
   cursor: not-allowed;
+}
+
+/* 移动端样式 */
+@media screen and (max-width: 767px) {
+  .config-container {
+    padding: 10px;
+  }
+
+  h1 {
+    font-size: 24px;
+    margin-bottom: 20px;
+  }
+
+  .config-form {
+    padding: 20px;
+    max-width: 100%;
+  }
+
+  input, select {
+    font-size: 14px;
+    padding: 10px;
+  }
+
+  button {
+    width: 100%;
+    min-width: auto;
+    padding: 12px 20px;
+    font-size: 14px;
+  }
+
+  .error-message {
+    padding: 10px;
+    font-size: 12px;
+  }
+}
+
+/* 平板样式 */
+@media screen and (min-width: 768px) and (max-width: 1023px) {
+  .config-container {
+    max-width: 90%;
+  }
+
+  .config-form {
+    max-width: 80%;
+    padding: 30px;
+  }
+
+  button {
+    min-width: 140px;
+  }
+}
+
+/* 桌面端样式 */
+@media screen and (min-width: 1024px) {
+  .config-container {
+    max-width: 800px;
+  }
+
+  .config-form {
+    max-width: 600px;
+  }
 }
 </style>

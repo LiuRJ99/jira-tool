@@ -331,4 +331,94 @@ h2 {
   border-radius: 8px;
   color: #595959;
 }
+
+/* 移动端样式 */
+@media screen and (max-width: 767px) {
+  .home-container {
+    padding: 10px;
+  }
+
+  .app-header {
+    flex-direction: column;
+    gap: 15px;
+    text-align: center;
+  }
+
+  h1 {
+    font-size: 24px;
+    margin: 0;
+  }
+
+  .input-group {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .input-group input {
+    font-size: 14px;
+  }
+
+  .input-group button {
+    width: 100%;
+    font-size: 14px;
+    padding: 8px 16px;
+  }
+
+  .results-table {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+
+  .results-table th,
+  .results-table td {
+    padding: 8px;
+    font-size: 14px;
+  }
+
+  .comment-item {
+    font-size: 12px;
+    padding: 6px;
+  }
+
+  .empty-state {
+    padding: 20px;
+    font-size: 14px;
+  }
+}
+
+/* 平板样式 */
+@media screen and (min-width: 768px) and (max-width: 1023px) {
+  .home-container {
+    max-width: 90%;
+    padding: 15px;
+  }
+
+  h1 {
+    font-size: 26px;
+  }
+
+  .input-group input {
+    font-size: 15px;
+  }
+
+  .input-group button {
+    padding: 10px 18px;
+    font-size: 15px;
+  }
+
+  .results-table th,
+  .results-table td {
+    padding: 10px;
+    font-size: 15px;
+  }
+}
+
+/* 桌面端样式 */
+@media screen and (min-width: 1024px) {
+  .home-container {
+    max-width: 1200px;
+    padding: 20px;
+  }
+}
 </style>
