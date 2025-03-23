@@ -35,6 +35,7 @@ export interface JiraIssueInfo {
   key: string;
   description: string;
   descriptionUrl: string;
+  assignee: string;
   commentAuthors: Array<{
     name: string;
     color: string;
@@ -252,6 +253,7 @@ export class JiraService {
           key,
           description: issue.fields.description || '',
           descriptionUrl,
+          assignee: issue.fields.assignee?.displayName || '未分配',
           commentAuthors: Array.from(globalCommentAuthors.values()),
           comments: filteredComments
         });
@@ -262,6 +264,7 @@ export class JiraService {
           key,
           description: '获取信息失败',
           descriptionUrl: '',
+          assignee: '未知',
           commentAuthors: [],
           comments: {
             [CommentType.TEST]: [],

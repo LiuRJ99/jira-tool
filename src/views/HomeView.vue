@@ -241,6 +241,7 @@ function openJiraPage(url: string) {
         <thead>
           <tr>
             <th>JIRA号</th>
+            <th>经办人</th>
             <th>{{ CommentTypeDisplayNames[CommentType.TEST] }}备注</th>
             <th>{{ CommentTypeDisplayNames[CommentType.REVIEW] }}备注</th>
             <th>{{ CommentTypeDisplayNames[CommentType.APPROVAL] }}备注</th>
@@ -251,6 +252,7 @@ function openJiraPage(url: string) {
         <tbody>
           <tr v-for="issue in jiraStore.issueResults" :key="issue.key">
             <td>{{ issue.key }}</td>
+            <td>{{ issue.assignee }}</td>
             <td>
               <div v-for="(comment, index) in filterComments(issue.comments[CommentType.TEST])" :key="index" class="comment-item">
                 <span class="author-dot" 
