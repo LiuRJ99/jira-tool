@@ -14,11 +14,27 @@ export interface JiraConfig {
 
 // 备注类型枚举
 export enum CommentType {
-  TEST = '测试',
-  REVIEW = '复核',
-  APPROVAL = '同意',
-  VERIFICATION = '验证'
+  TEST = 'TEST',
+  REVIEW = 'REVIEW',
+  APPROVAL = 'APPROVAL',
+  VERIFICATION = 'VERIFICATION'
 }
+
+// 备注类型关键字映射
+export const CommentTypeKeywords: Record<CommentType, string[]> = {
+  [CommentType.TEST]: ['测试', '确认无误', '测试完成'],
+  [CommentType.REVIEW]: ['复核', '评审', '代码审查'],
+  [CommentType.APPROVAL]: ['同意', '批准', '确认通过'],
+  [CommentType.VERIFICATION]: ['验证', '复验', '确认验证']
+};
+
+// 备注类型显示名称
+export const CommentTypeDisplayNames: Record<CommentType, string> = {
+  [CommentType.TEST]: '测试',
+  [CommentType.REVIEW]: '复核',
+  [CommentType.APPROVAL]: '同意',
+  [CommentType.VERIFICATION]: '验证'
+};
 
 // JIRA工单信息接口
 export interface JiraIssueInfo {
@@ -216,20 +232,12 @@ export class JiraService {
             ? `${authorPrefix}${comment.body}(${formattedDate}) ⚠️`
             : `${authorPrefix}${comment.body}`;
           
-          if (body.includes(CommentType.TEST)) {
-            filteredComments[CommentType.TEST].push(body);
-          }
-          
-          if (body.includes(CommentType.REVIEW)) {
-            filteredComments[CommentType.REVIEW].push(body);
-          }
-          
-          if (body.includes(CommentType.APPROVAL)) {
-            filteredComments[CommentType.APPROVAL].push(body);
-          }
-          
-          if (body.includes(CommentType.VERIFICATION)) {
-            filteredComments[CommentType.VERIFICATION].push(body);
+          // 检查每种类型的所有关键字
+          for (const type of Object.values(CommentType)) {
+            if (CommentTypeKeywords[type].some(keyword => body.includes(keyword))) {
+              filteredComments[type].push(body);
+              break; // 一条评论只归类到一种类型
+            }
           }
         }
         

@@ -2,7 +2,7 @@
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useJiraStore } from '@/stores/jira';
-import { CommentType } from '@/services/jira.service';
+import { CommentType, CommentTypeDisplayNames } from '@/services/jira.service';
 
 const jiraStore = useJiraStore();
 const router = useRouter();
@@ -108,10 +108,10 @@ function openJiraPage(url: string) {
         <thead>
           <tr>
             <th>JIRA号</th>
-            <th>测试备注</th>
-            <th>复核备注</th>
-            <th>同意备注</th>
-            <th>验证备注</th>
+            <th>{{ CommentTypeDisplayNames[CommentType.TEST] }}备注</th>
+            <th>{{ CommentTypeDisplayNames[CommentType.REVIEW] }}备注</th>
+            <th>{{ CommentTypeDisplayNames[CommentType.APPROVAL] }}备注</th>
+            <th>{{ CommentTypeDisplayNames[CommentType.VERIFICATION] }}备注</th>
             <th>描述</th>
           </tr>
         </thead>
