@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { useJiraStore } from '@/stores/jira';
 import { CommentType, CommentTypeDisplayNames,DescriptionKeywords } from '@/services/jira.service';
@@ -7,6 +7,25 @@ import { CommentType, CommentTypeDisplayNames,DescriptionKeywords } from '@/serv
 const jiraStore = useJiraStore();
 const router = useRouter();
 const issueInput = ref('');
+const selectedAuthors = ref<string[]>([]);
+
+// 切换作者选中状态
+function toggleAuthor(authorName: string) {
+  const index = selectedAuthors.value.indexOf(authorName);
+  if (index === -1) {
+    selectedAuthors.value.push(authorName);
+  } else {
+    selectedAuthors.value.splice(index, 1);
+  }
+}
+
+// 根据选中的作者过滤评论
+function filterCommentsByAuthor(comments: string[]) {
+  if (selectedAuthors.value.length === 0) return comments;
+  return comments.filter(comment => 
+    selectedAuthors.value.some(author => comment.startsWith(`[${author}]`))
+  );
+}
 
 
 
@@ -80,7 +99,13 @@ function openJiraPage(url: string) {
     <div v-if="jiraStore.issueResults.length > 0" class="authors-list">
       <h3>参与人员</h3>
       <div class="authors-container">
-        <div class="author-item" v-for="author in jiraStore.issueResults[0].commentAuthors" :key="author.name">
+        <div 
+            class="author-item" 
+            v-for="author in jiraStore.issueResults[0].commentAuthors" 
+            :key="author.name"
+            @click="toggleAuthor(author.name)"
+            :class="{ 'author-item-selected': selectedAuthors.includes(author.name) }"
+          >
           <span class="author-dot" :style="{ backgroundColor: author.color }"></span>
           <span class="author-name">{{ author.name }}</span>
         </div>
@@ -129,7 +154,7 @@ function openJiraPage(url: string) {
           <tr v-for="issue in jiraStore.issueResults" :key="issue.key">
             <td>{{ issue.key }}</td>
             <td>
-              <div v-for="(comment, index) in issue.comments[CommentType.TEST]" :key="index" class="comment-item">
+              <div v-for="(comment, index) in filterCommentsByAuthor(issue.comments[CommentType.TEST])" :key="index" class="comment-item">
                 <span class="author-dot" 
                       v-for="author in issue.commentAuthors.filter(a => comment.startsWith(`[${a.name}]`))" 
                       :key="author.name"
@@ -142,7 +167,7 @@ function openJiraPage(url: string) {
               </div>
             </td>
             <td>
-              <div v-for="(comment, index) in issue.comments[CommentType.REVIEW]" :key="index" class="comment-item">
+              <div v-for="(comment, index) in filterCommentsByAuthor(issue.comments[CommentType.REVIEW])" :key="index" class="comment-item">
                 <span class="author-dot" 
                       v-for="author in issue.commentAuthors.filter(a => comment.startsWith(`[${a.name}]`))" 
                       :key="author.name"
@@ -155,7 +180,7 @@ function openJiraPage(url: string) {
               </div>
             </td>
             <td>
-              <div v-for="(comment, index) in issue.comments[CommentType.APPROVAL]" :key="index" class="comment-item">
+              <div v-for="(comment, index) in filterCommentsByAuthor(issue.comments[CommentType.APPROVAL])" :key="index" class="comment-item">
                 <span class="author-dot" 
                       v-for="author in issue.commentAuthors.filter(a => comment.startsWith(`[${a.name}]`))" 
                       :key="author.name"
@@ -168,7 +193,7 @@ function openJiraPage(url: string) {
               </div>
             </td>
             <td>
-              <div v-for="(comment, index) in issue.comments[CommentType.VERIFICATION]" :key="index" class="comment-item">
+              <div v-for="(comment, index) in filterCommentsByAuthor(issue.comments[CommentType.VERIFICATION])" :key="index" class="comment-item">
                 <span class="author-dot" 
                       v-for="author in issue.commentAuthors.filter(a => comment.startsWith(`[${a.name}]`))" 
                       :key="author.name"
