@@ -33,6 +33,7 @@ export const DescriptionKeywords = jiraKeywords.descriptionKeywords;
 // JIRA工单信息接口
 export interface JiraIssueInfo {
   key: string;
+  title: string;
   description: string;
   descriptionUrl: string;
   assignee: string;
@@ -251,6 +252,7 @@ export class JiraService {
         // 添加到结果数组，使用全局收集的作者信息
         results.push({
           key,
+          title: issue.fields.summary || '',
           description: issue.fields.description || '',
           descriptionUrl,
           assignee: issue.fields.assignee?.displayName || '未分配',
@@ -262,6 +264,7 @@ export class JiraService {
         // 对于失败的工单，添加错误信息
         results.push({
           key,
+          title: '获取信息失败',
           description: '获取信息失败',
           descriptionUrl: '',
           assignee: '未知',

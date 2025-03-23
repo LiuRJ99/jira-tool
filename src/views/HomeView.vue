@@ -10,6 +10,9 @@ const issueInput = ref('');
 const selectedAuthors = ref<string[]>([]);
 const selectedKeywords = ref<string[]>([]);
 const activeTab = ref('authors'); // 当前激活的tab
+const showCopySuccess = ref(false);
+const VITE_APP_APPROVER1 = import.meta.env.VITE_APP_APPROVER1;
+const VITE_APP_APPROVER2 = import.meta.env.VITE_APP_APPROVER2;
 
 // 切换作者选中状态
 function toggleAuthor(authorName: string) {
@@ -153,6 +156,84 @@ function openJiraPage(url: string) {
     window.open(url, '_blank');
   }
 }
+
+// 获取A审批内容
+function getApprovalA() {
+  const result = jiraStore.issueResults
+    .filter(issue => 
+      issue.comments[CommentType.TEST].length > 0 && 
+      issue.comments[CommentType.REVIEW].length > 0
+    )
+    .map(issue => `${issue.key}：${issue.title || '无标题'}`)
+    .join('\n');
+    
+  copyToClipboard(result);
+}
+
+// 获取B审批内容
+function getApprovalB() {
+  const result = jiraStore.issueResults
+    .filter(issue => {
+      const approvalComments = issue.comments[CommentType.APPROVAL];
+      return approvalComments.length > 0 && approvalComments.some(comment => 
+        comment.startsWith(`[${VITE_APP_APPROVER1}]`) ||  // 修改为import.meta.env
+        (comment.includes(VITE_APP_APPROVER1) && comment.includes('同意'))
+      ) && approvalComments.some(comment => 
+        comment.startsWith(`[${VITE_APP_APPROVER2}]`) ||  // 修改为import.meta.env
+        (comment.includes(VITE_APP_APPROVER2) && comment.includes('同意'))
+      );
+    })
+    .map(issue => `${issue.key}：${issue.title || '无标题'}`)
+    .join('\n');
+    
+  copyToClipboard(result);
+}
+
+// 获取C审批内容 
+function getApprovalC() {
+  /**
+   * 1、获取APPROVAL备注不为空并且（备注人为VITE_APP_APPROVER1或者备注内容为包含VITE_APP_APPROVER1、同意）的JIRA
+   * 2、获取其他剩余jira
+   * 输出格式为：
+   * 待用户测试/待审批
+   * xxx：xxx（第一个结果集）
+   * 开发中
+   * xxx：xxx（第二个结果集）
+   * */ 
+  const resultA = jiraStore.issueResults
+   .filter(issue => {
+      const approvalComments = issue.comments[CommentType.APPROVAL];
+      return approvalComments.length > 0 && approvalComments.some(comment =>
+        comment.startsWith('[VITE_APP_APPROVER1]') ||
+        (comment.includes('VITE_APP_APPROVER1') && comment.includes('同意'))
+      );
+    })
+    .map(issue => `${issue.key}：${issue.title || '无标题'}`)
+    .join('\n');
+
+  const resultB = jiraStore.issueResults
+  .filter(issue => {
+      const approvalComments = issue.comments[CommentType.APPROVAL];
+      return approvalComments.length === 0;
+    })
+   .map(issue => `${issue.key}：${issue.title || '无标题'}`)
+   .join('\n');
+  const result = `待用户测试/待审批\n${resultA}\n开发中\n${resultB}`;
+  copyToClipboard(result);
+}
+
+// 复制到剪贴板
+async function copyToClipboard(text: string) {
+  try {
+    await navigator.clipboard.writeText(text);
+    showCopySuccess.value = true;
+    setTimeout(() => {
+      showCopySuccess.value = false;
+    }, 2000);
+  } catch (err) {
+    console.error('复制失败:', err);
+  }
+}
 </script>
 
 <template>
@@ -224,6 +305,23 @@ function openJiraPage(url: string) {
           清空
         </button>
       </div>
+
+      <div class="approval-section" v-if="jiraStore.issueResults.length > 0">
+        <button class="approval-btn type-a" @click="getApprovalA" title="获取TEST备注和REVIEW备注都不为空的JIRA">
+          {{ VITE_APP_APPROVER1 }}审批
+        </button>
+        <button class="approval-btn type-b" @click="getApprovalB" title="获取VITE_APP_APPROVER1审批或同意的JIRA">
+          {{ VITE_APP_APPROVER2 }}审批
+        </button>
+        <button class="approval-btn type-c" @click="getApprovalC" title="获取所有待审批的JIRA">
+          ALL待发布
+        </button>
+        <transition name="fade">
+          <div v-if="showCopySuccess" class="copy-success">
+            已复制到剪贴板
+          </div>
+        </transition>
+      </div>
       
       <div v-if="jiraStore.errorMessage" class="error-message">
         {{ jiraStore.errorMessage }}
@@ -251,7 +349,16 @@ function openJiraPage(url: string) {
         </thead>
         <tbody>
           <tr v-for="issue in jiraStore.issueResults" :key="issue.key">
-            <td>{{ issue.key }}</td>
+            <td>
+              <a 
+                href="#" 
+                @click.prevent="openJiraPage(issue.descriptionUrl)"
+                class="jira-link"
+                :title="issue.title || '无标题'"
+              >
+                {{ issue.key }}
+              </a>
+            </td>
             <td>{{ issue.assignee }}</td>
             <td>
               <div v-for="(comment, index) in filterComments(issue.comments[CommentType.TEST])" :key="index" class="comment-item">
