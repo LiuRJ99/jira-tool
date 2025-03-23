@@ -117,13 +117,14 @@ async function handleQuery(forceRefresh: boolean = false) {
     return;
   }
   
-  // 分割工单号（以逗号分隔）并去重
+  // 分割工单号（以逗号或空格分隔）并去重
   const issueKeys = [...new Set(
     issueInput.value
-      .split(',')
+      .split(/[,\s]+/)
       .map(key => key.trim())
       .filter(key => key !== '')
   )];
+  
   
   if (issueKeys.length === 0) {
     return;
@@ -204,7 +205,9 @@ function getApprovalC() {
   const resultB = jiraStore.issueResults
   .filter(issue => {
       const approvalComments = issue.comments[CommentType.APPROVAL];
-      return approvalComments.length === 0;
+      return approvalComments.length === 0 || !approvalComments.some(comment =>
+        comment.includes(VITE_APP_APPROVER1)
+      );
     })
    .map(issue => `${issue.key}：${issue.title || '无标题'}`)
    .join('\n');
@@ -313,7 +316,7 @@ const copyContentEmpty = ref(false);
           {{ VITE_APP_APPROVER2 }}审批
         </button>
         <button class="approval-btn type-c" @click="getApprovalC" title="获取所有待审批的JIRA">
-          ALL待发布
+          待发布
         </button>
         <transition name="fade">
           <div v-if="showCopySuccess" class="copy-success">
@@ -422,7 +425,7 @@ const copyContentEmpty = ref(false);
                 :title="issue.description"
                 :class="{ 'warning-text': issue.description && !DescriptionKeywords.some(keyword => issue.description.includes(keyword)) }"
                 >
-                {{ issue.description ? '查看描述' : '无描述' }}
+                {{ issue.description ? '查看' : '无' }}
                 </a>
             </td>
           </tr>

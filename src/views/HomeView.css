@@ -443,6 +443,15 @@ h2 {
   background-color: #73d13d;
 }
 
+.approval-btn.type-c {
+  background-color: #595959;
+  color: white;
+}
+
+.approval-btn.type-c:hover {
+  background-color: #666;
+}
+
 .copy-success {
   background-color: #f6ffed;
   border: 1px solid #b7eb8f;

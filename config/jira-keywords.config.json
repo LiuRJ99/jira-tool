@@ -8,7 +8,7 @@
   "commentTypeDisplayNames": {
     "TEST": "测试",
     "REVIEW": "复核",
-    "APPROVAL": "同意",
+    "APPROVAL": "审批",
     "VERIFICATION": "验证"
   },
   "descriptionKeywords": ["问题描述", "原因分析", "解决方案"]
