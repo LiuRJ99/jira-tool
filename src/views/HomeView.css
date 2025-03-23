@@ -14,11 +14,40 @@
     width: 100%;
     margin-bottom: 20px;
   }
-  
-  .authors-list h3 {
-    margin: 0 0 10px 0;
-    font-size: 16px;
-    color: #333;
+
+  .filter-tabs {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+    border-bottom: 1px solid #e8e8e8;
+  }
+
+  .tab-item {
+    padding: 8px 16px;
+    cursor: pointer;
+    border-radius: 4px 4px 0 0;
+    transition: all 0.3s ease;
+    font-size: 14px;
+    color: #666;
+    position: relative;
+  }
+
+  .tab-item:hover {
+    color: #1890ff;
+  }
+
+  .tab-item.active {
+    color: #1890ff;
+    background-color: #fff;
+    border: 1px solid #e8e8e8;
+    border-bottom: 1px solid #fff;
+    margin-bottom: -1px;
+  }
+
+  .tab-content {
+    background-color: #fff;
+    border-radius: 0 0 4px 4px;
+    padding: 15px;
   }
   
   .authors-container {
@@ -333,5 +362,22 @@
     .home-container {
       max-width: 1200px;
       padding: 20px;
+      /* 添加过渡效果 */
+      .fade-enter-active,
+      .fade-leave-active {
+        transition: all 0.2s ease;
+      }
+      
+      .fade-enter-from,
+      .fade-leave-to {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      
+      /* 确保容器高度稳定 */
+      .tab-content {
+        min-height: 150px; /* 根据实际内容调整 */
+        position: relative;
+      }
     }
   }

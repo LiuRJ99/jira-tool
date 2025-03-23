@@ -9,6 +9,7 @@ const router = useRouter();
 const issueInput = ref('');
 const selectedAuthors = ref<string[]>([]);
 const selectedKeywords = ref<string[]>([]);
+const activeTab = ref('authors'); // 当前激活的tab
 
 // 切换作者选中状态
 function toggleAuthor(authorName: string) {
@@ -128,31 +129,50 @@ function openJiraPage(url: string) {
     </header>
 
     <div v-if="jiraStore.issueResults.length > 0" class="authors-list">
-      <h3>参与人员</h3>
-      <div class="authors-container">
+      <div class="filter-tabs">
         <div 
-            class="author-item" 
-            v-for="author in jiraStore.issueResults[0].commentAuthors" 
-            :key="author.name"
-            @click="toggleAuthor(author.name)"
-            :class="{ 'author-item-selected': selectedAuthors.includes(author.name) }"
-          >
-          <span class="author-dot" :style="{ backgroundColor: author.color }"></span>
-          <span class="author-name">{{ author.name }}</span>
+          class="tab-item" 
+          :class="{ 'active': activeTab === 'authors' }" 
+          @click="activeTab = 'authors'"
+        >
+          参与人员
+        </div>
+        <div 
+          class="tab-item" 
+          :class="{ 'active': activeTab === 'keywords' }" 
+          @click="activeTab = 'keywords'"
+        >
+          关键字筛选
         </div>
       </div>
 
-      <h3>关键字筛选</h3>
-      <div class="keywords-container">
-        <div 
-            class="keyword-item" 
-            v-for="keyword in allKeywords" 
-            :key="keyword"
-            @click="toggleKeyword(keyword)"
-            :class="{ 'keyword-item-selected': selectedKeywords.includes(keyword) }"
-          >
-          {{ keyword }}
-        </div>
+      <div class="tab-content">
+        <transition name="fade" mode="out-in">
+          <div v-if="activeTab === 'authors'" class="authors-container" key="authors">
+            <div 
+              class="author-item" 
+              v-for="author in jiraStore.issueResults[0].commentAuthors" 
+              :key="author.name"
+              @click="toggleAuthor(author.name)"
+              :class="{ 'author-item-selected': selectedAuthors.includes(author.name) }"
+            >
+              <span class="author-dot" :style="{ backgroundColor: author.color }"></span>
+              <span class="author-name">{{ author.name }}</span>
+            </div>
+          </div>
+          
+          <div v-else-if="activeTab === 'keywords'" class="keywords-container" key="keywords">
+            <div 
+              class="keyword-item" 
+              v-for="keyword in allKeywords" 
+              :key="keyword"
+              @click="toggleKeyword(keyword)"
+              :class="{ 'keyword-item-selected': selectedKeywords.includes(keyword) }"
+            >
+              {{ keyword }}
+            </div>
+          </div>
+        </transition>
       </div>
     </div>
     
