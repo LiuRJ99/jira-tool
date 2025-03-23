@@ -8,6 +8,8 @@ const jiraStore = useJiraStore();
 const router = useRouter();
 const issueInput = ref('');
 
+
+
 // 在组件加载时初始化
 onMounted(() => {
   // 组件加载时不需要额外处理，全局导航守卫已经处理了路由跳转逻辑
@@ -19,15 +21,20 @@ async function handleQuery() {
     return;
   }
   
-  // 分割工单号（以逗号分隔）
-  const issueKeys = issueInput.value
-    .split(',')
-    .map(key => key.trim())
-    .filter(key => key !== '');
+  // 分割工单号（以逗号分隔）并去重
+  const issueKeys = [...new Set(
+    issueInput.value
+      .split(',')
+      .map(key => key.trim())
+      .filter(key => key !== '')
+  )];
   
   if (issueKeys.length === 0) {
     return;
   }
+  
+  // 更新输入框内容为去重后的工单号
+  issueInput.value = issueKeys.join(', ');
   
   // 发起查询
   await jiraStore.fetchIssues(issueKeys);
@@ -59,6 +66,16 @@ function openJiraPage(url: string) {
       <h1>JIRA工单信息查询</h1>
       <button class="logout-btn" @click="handleLogout">退出登录</button>
     </header>
+
+    <div v-if="jiraStore.issueResults.length > 0" class="authors-list">
+      <h3>参与人员</h3>
+      <div class="authors-container">
+        <div class="author-item" v-for="author in jiraStore.issueResults[0].commentAuthors" :key="author.name">
+          <span class="author-dot" :style="{ backgroundColor: author.color }"></span>
+          <span class="author-name">{{ author.name }}</span>
+        </div>
+      </div>
+    </div>
     
     <div class="query-section">
       <div class="input-group">
@@ -103,6 +120,11 @@ function openJiraPage(url: string) {
             <td>{{ issue.key }}</td>
             <td>
               <div v-for="(comment, index) in issue.comments[CommentType.TEST]" :key="index" class="comment-item">
+                <span class="author-dot" 
+                      v-for="author in issue.commentAuthors.filter(a => comment.includes(a.name))" 
+                      :key="author.name"
+                      :style="{ backgroundColor: author.color }">
+                </span>
                 {{ comment }}
               </div>
               <div v-if="issue.comments[CommentType.TEST].length === 0" class="no-data">
@@ -111,6 +133,11 @@ function openJiraPage(url: string) {
             </td>
             <td>
               <div v-for="(comment, index) in issue.comments[CommentType.REVIEW]" :key="index" class="comment-item">
+                <span class="author-dot" 
+                      v-for="author in issue.commentAuthors.filter(a => comment.includes(a.name))" 
+                      :key="author.name"
+                      :style="{ backgroundColor: author.color }">
+                </span>
                 {{ comment }}
               </div>
               <div v-if="issue.comments[CommentType.REVIEW].length === 0" class="no-data">
@@ -119,6 +146,11 @@ function openJiraPage(url: string) {
             </td>
             <td>
               <div v-for="(comment, index) in issue.comments[CommentType.APPROVAL]" :key="index" class="comment-item">
+                <span class="author-dot" 
+                      v-for="author in issue.commentAuthors.filter(a => comment.includes(a.name))" 
+                      :key="author.name"
+                      :style="{ backgroundColor: author.color }">
+                </span>
                 {{ comment }}
               </div>
               <div v-if="issue.comments[CommentType.APPROVAL].length === 0" class="no-data">
@@ -127,6 +159,11 @@ function openJiraPage(url: string) {
             </td>
             <td>
               <div v-for="(comment, index) in issue.comments[CommentType.VERIFICATION]" :key="index" class="comment-item">
+                <span class="author-dot" 
+                      v-for="author in issue.commentAuthors.filter(a => comment.includes(a.name))" 
+                      :key="author.name"
+                      :style="{ backgroundColor: author.color }">
+                </span>
                 {{ comment }}
               </div>
               <div v-if="issue.comments[CommentType.VERIFICATION].length === 0" class="no-data">
@@ -159,6 +196,55 @@ function openJiraPage(url: string) {
   padding: 20px;
   max-width: 1200px;
   margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.authors-list {
+  background-color: #f5f5f5;
+  padding: 15px;
+  border-radius: 8px;
+  width: 100%;
+  margin-bottom: 20px;
+}
+
+.authors-list h3 {
+  margin: 0 0 10px 0;
+  font-size: 16px;
+  color: #333;
+}
+
+.authors-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.author-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background-color: white;
+  padding: 6px 12px;
+  border-radius: 16px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.author-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.author-name {
+  font-size: 14px;
+  color: #666;
+}
+
+.comment-item .author-dot {
+  margin-right: 4px;
 }
 
 .app-header {
@@ -334,34 +420,13 @@ h2 {
 
 /* 移动端样式 */
 @media screen and (max-width: 767px) {
-  .home-container {
-    padding: 10px;
+  .authors-container {
+    gap: 8px;
   }
 
-  .app-header {
-    flex-direction: column;
-    gap: 15px;
-    text-align: center;
-  }
-
-  h1 {
-    font-size: 24px;
-    margin: 0;
-  }
-
-  .input-group {
-    flex-direction: column;
-    gap: 10px;
-  }
-
-  .input-group input {
-    font-size: 14px;
-  }
-
-  .input-group button {
-    width: 100%;
-    font-size: 14px;
-    padding: 8px 16px;
+  .author-item {
+    padding: 4px 8px;
+    font-size: 12px;
   }
 
   .results-table {

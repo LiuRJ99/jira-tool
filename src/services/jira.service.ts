@@ -25,6 +25,10 @@ export interface JiraIssueInfo {
   key: string;
   description: string;
   descriptionUrl: string;
+  commentAuthors: Array<{
+    name: string;
+    color: string;
+  }>;
   comments: {
     [CommentType.TEST]: string[];
     [CommentType.REVIEW]: string[];
@@ -136,7 +140,49 @@ export class JiraService {
     }
 
     const results: JiraIssueInfo[] = [];
+    const colors = [
+      '#E74C3C', // 鲜红色
+      '#3498DB', // 明亮蓝色
+      '#2ECC71', // 翠绿色
+      '#9B59B6', // 紫色
+      '#F1C40F', // 亮黄色
+      '#1ABC9C', // 青绿色
+      '#E67E22', // 橙色
+      '#34495E', // 深蓝灰色
+      '#27AE60', // 深绿色
+      '#8E44AD', // 深紫色
+      '#D35400', // 深橙色
+      '#16A085', // 深青色
+      '#C0392B', // 深红色
+      '#2980B9', // 深蓝色
+      '#F39C12', // 金色
+      '#2C3E50'  // 靛蓝色
+    ];
 
+    // 创建全局的commentAuthors集合
+    const globalCommentAuthors = new Map<string, { name: string; color: string }>();
+    let colorIndex = 0;
+
+    // 第一次遍历：收集所有工单的评论作者
+    for (const key of issueKeys) {
+      try {
+        const comments = await this.getComments(key);
+        for (const comment of comments.comments) {
+          const authorName = comment.author.displayName;
+          if (!globalCommentAuthors.has(authorName)) {
+            globalCommentAuthors.set(authorName, {
+              name: authorName,
+              color: colors[colorIndex % colors.length]
+            });
+            colorIndex++;
+          }
+        }
+      } catch (error) {
+        console.error(`获取JIRA工单 ${key} 评论失败:`, error);
+      }
+    }
+
+    // 第二次遍历：处理每个工单的详细信息
     for (const key of issueKeys) {
       try {
         // 获取工单详情
@@ -152,10 +198,22 @@ export class JiraService {
           [CommentType.APPROVAL]: [] as string[],
           [CommentType.VERIFICATION]: [] as string[]
         };
+
         
         // 提取包含关键字的备注
         for (const comment of comments.comments) {
-          const body = comment.body;
+          // 获取评论创建时间
+          const commentDate = new Date(comment.created);
+          const now = new Date();
+          const daysDiff = Math.floor((now.getTime() - commentDate.getTime()) / (1000 * 60 * 60 * 24));
+          
+          // 格式化日期
+          const formattedDate = `${commentDate.getFullYear()}-${String(commentDate.getMonth() + 1).padStart(2, '0')}-${String(commentDate.getDate()).padStart(2, '0')}`;
+          
+          // 如果超过7天，添加醒目标注
+          const body = daysDiff > 7 
+            ? `${comment.body}(${formattedDate}) ⚠️`
+            : comment.body;
           
           if (body.includes(CommentType.TEST)) {
             filteredComments[CommentType.TEST].push(body);
@@ -178,11 +236,12 @@ export class JiraService {
         const protocol = this.config.protocol || 'http';
         const descriptionUrl = `${protocol}://${this.originalHost}/browse/${key}`;
         
-        // 添加到结果数组
+        // 添加到结果数组，使用全局收集的作者信息
         results.push({
           key,
           description: issue.fields.description || '',
           descriptionUrl,
+          commentAuthors: Array.from(globalCommentAuthors.values()),
           comments: filteredComments
         });
       } catch (error) {
@@ -192,6 +251,7 @@ export class JiraService {
           key,
           description: '获取信息失败',
           descriptionUrl: '',
+          commentAuthors: [],
           comments: {
             [CommentType.TEST]: [],
             [CommentType.REVIEW]: [],
@@ -222,4 +282,4 @@ export class JiraService {
 }
 
 // 导出单例
-export const jiraService = new JiraService(); 
+export const jiraService = new JiraService();
