@@ -157,13 +157,15 @@ function openJiraPage(url: string) {
   }
 }
 
-// 获取A审批内容
+// 获取A审批内容:TEST和REVIEW备注都不为空的JIRA并且APPROVAL备注不包含VITE_APP_APPROVER1
 function getApprovalA() {
   const result = jiraStore.issueResults
     .filter(issue => 
       issue.comments[CommentType.TEST].length > 0 && 
-      issue.comments[CommentType.REVIEW].length > 0
-    )
+      issue.comments[CommentType.REVIEW].length > 0 &&
+      !issue.comments[CommentType.APPROVAL].some(comment =>
+        comment.includes(`${VITE_APP_APPROVER1}`))
+      )
     .map(issue => `${issue.key}：${issue.title || '无标题'}`)
     .join('\n');
     
@@ -176,11 +178,9 @@ function getApprovalB() {
     .filter(issue => {
       const approvalComments = issue.comments[CommentType.APPROVAL];
       return approvalComments.length > 0 && approvalComments.some(comment => 
-        comment.startsWith(`[${VITE_APP_APPROVER1}]`) ||  // 修改为import.meta.env
-        (comment.includes(VITE_APP_APPROVER1) && comment.includes('同意'))
-      ) && approvalComments.some(comment => 
-        comment.startsWith(`[${VITE_APP_APPROVER2}]`) ||  // 修改为import.meta.env
-        (comment.includes(VITE_APP_APPROVER2) && comment.includes('同意'))
+        comment.includes(VITE_APP_APPROVER1)
+      ) && !approvalComments.some(comment => 
+        comment.includes(`${VITE_APP_APPROVER2}`)
       );
     })
     .map(issue => `${issue.key}：${issue.title || '无标题'}`)
@@ -191,21 +191,11 @@ function getApprovalB() {
 
 // 获取C审批内容 
 function getApprovalC() {
-  /**
-   * 1、获取APPROVAL备注不为空并且（备注人为VITE_APP_APPROVER1或者备注内容为包含VITE_APP_APPROVER1、同意）的JIRA
-   * 2、获取其他剩余jira
-   * 输出格式为：
-   * 待用户测试/待审批
-   * xxx：xxx（第一个结果集）
-   * 开发中
-   * xxx：xxx（第二个结果集）
-   * */ 
   const resultA = jiraStore.issueResults
    .filter(issue => {
       const approvalComments = issue.comments[CommentType.APPROVAL];
       return approvalComments.length > 0 && approvalComments.some(comment =>
-        comment.startsWith('[VITE_APP_APPROVER1]') ||
-        (comment.includes('VITE_APP_APPROVER1') && comment.includes('同意'))
+        comment.includes(VITE_APP_APPROVER1)
       );
     })
     .map(issue => `${issue.key}：${issue.title || '无标题'}`)
