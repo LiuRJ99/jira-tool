@@ -121,7 +121,7 @@ function openJiraPage(url: string) {
             <td>
               <div v-for="(comment, index) in issue.comments[CommentType.TEST]" :key="index" class="comment-item">
                 <span class="author-dot" 
-                      v-for="author in issue.commentAuthors.filter(a => comment.includes(a.name))" 
+                      v-for="author in issue.commentAuthors.filter(a => comment.startsWith(`[${a.name}]`))" 
                       :key="author.name"
                       :style="{ backgroundColor: author.color }">
                 </span>
@@ -134,7 +134,7 @@ function openJiraPage(url: string) {
             <td>
               <div v-for="(comment, index) in issue.comments[CommentType.REVIEW]" :key="index" class="comment-item">
                 <span class="author-dot" 
-                      v-for="author in issue.commentAuthors.filter(a => comment.includes(a.name))" 
+                      v-for="author in issue.commentAuthors.filter(a => comment.startsWith(`[${a.name}]`))" 
                       :key="author.name"
                       :style="{ backgroundColor: author.color }">
                 </span>
@@ -147,7 +147,7 @@ function openJiraPage(url: string) {
             <td>
               <div v-for="(comment, index) in issue.comments[CommentType.APPROVAL]" :key="index" class="comment-item">
                 <span class="author-dot" 
-                      v-for="author in issue.commentAuthors.filter(a => comment.includes(a.name))" 
+                      v-for="author in issue.commentAuthors.filter(a => comment.startsWith(`[${a.name}]`))" 
                       :key="author.name"
                       :style="{ backgroundColor: author.color }">
                 </span>
@@ -160,7 +160,7 @@ function openJiraPage(url: string) {
             <td>
               <div v-for="(comment, index) in issue.comments[CommentType.VERIFICATION]" :key="index" class="comment-item">
                 <span class="author-dot" 
-                      v-for="author in issue.commentAuthors.filter(a => comment.includes(a.name))" 
+                      v-for="author in issue.commentAuthors.filter(a => comment.startsWith(`[${a.name}]`))" 
                       :key="author.name"
                       :style="{ backgroundColor: author.color }">
                 </span>

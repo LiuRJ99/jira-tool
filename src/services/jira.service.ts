@@ -210,10 +210,11 @@ export class JiraService {
           // 格式化日期
           const formattedDate = `${commentDate.getFullYear()}-${String(commentDate.getMonth() + 1).padStart(2, '0')}-${String(commentDate.getDate()).padStart(2, '0')}`;
           
-          // 如果超过7天，添加醒目标注
+          // 添加作者名称作为前缀，如果超过7天，添加醒目标注
+          const authorPrefix = `[${comment.author.displayName}] `;
           const body = daysDiff > 7 
-            ? `${comment.body}(${formattedDate}) ⚠️`
-            : comment.body;
+            ? `${authorPrefix}${comment.body}(${formattedDate}) ⚠️`
+            : `${authorPrefix}${comment.body}`;
           
           if (body.includes(CommentType.TEST)) {
             filteredComments[CommentType.TEST].push(body);
