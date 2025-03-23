@@ -383,11 +383,27 @@ h2 {
 }
 
 /* 桌面端样式 */
-@media screen and (min-width: 1024px) {
+@media screen and (min-width: 1600px) {
   .home-container {
-    max-width: 1200px;
-    padding: 20px;
+    max-width: 1400px;  /* 大屏幕下进一步扩展 */
   }
+}
+
+/* 表格布局优化 */
+.results-table {
+  width: 100%;
+  table-layout: auto;  /* 原可能为fixed */
+}
+
+/* 输入框组适配 */
+.input-group {
+  max-width: 100%;
+  width: 800px;  /* 原可能为600px */
+}
+
+/* 审批按钮容器 */
+.approval-section {
+  gap: 15px;  /* 增加按钮间距 */
 }
 
 .approval-section {
@@ -431,6 +447,15 @@ h2 {
   background-color: #f6ffed;
   border: 1px solid #b7eb8f;
   color: #52c41a;
+  padding: 4px 12px;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.copy-empty {
+  background-color: #f6ffed;
+  border: 1px solid #ffeeba;
+  color: #856404;
   padding: 4px 12px;
   border-radius: 4px;
   font-size: 14px;

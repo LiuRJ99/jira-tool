@@ -215,8 +215,14 @@ function getApprovalC() {
 // 复制到剪贴板
 async function copyToClipboard(text: string) {
   try {
+    if (!text.trim()) {
+      showCopySuccess.value = false;
+      copyContentEmpty.value = true; // 新增空内容状态
+      return;
+    }
     await navigator.clipboard.writeText(text);
     showCopySuccess.value = true;
+    copyContentEmpty.value = false;
     setTimeout(() => {
       showCopySuccess.value = false;
     }, 2000);
@@ -224,6 +230,9 @@ async function copyToClipboard(text: string) {
     console.error('复制失败:', err);
   }
 }
+
+// 在 setup 部分新增响应式变量
+const copyContentEmpty = ref(false);
 </script>
 
 <template>
@@ -309,6 +318,9 @@ async function copyToClipboard(text: string) {
         <transition name="fade">
           <div v-if="showCopySuccess" class="copy-success">
             已复制到剪贴板
+          </div>
+          <div v-else-if="copyContentEmpty" class="copy-empty">
+            无审批
           </div>
         </transition>
       </div>
