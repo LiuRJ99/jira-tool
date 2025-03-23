@@ -75,16 +75,116 @@ export const useJiraStore = defineStore('jira', () => {
    * 查询JIRA工单信息
    * @param issueKeys 工单号数组
    */
-  async function fetchIssues(issueKeys: string[]) {
+  /**
+   * Get cached results for issue keys
+   * @param issueKeys Issue keys to check cache for
+   */
+  function getCachedResults(issueKeys: string[]): { results: JiraIssueInfo[], order: string[] } | null {
+    try {
+      // Sort keys for cache lookup
+      const cacheKey = [...issueKeys].sort().join(',');
+      const cached = localStorage.getItem(`jira-results-${cacheKey}`);
+      const orderKey = `jira-order-${cacheKey}`;
+      const savedOrder = localStorage.getItem(orderKey);
+      
+      if (cached && savedOrder) {
+        const results = JSON.parse(cached);
+        const order = JSON.parse(savedOrder);
+        return { results, order };
+      }
+    } catch (error) {
+      console.error('Error reading from cache:', error);
+    }
+    return null;
+  }
+
+  /**
+   * Cache results for issue keys
+   * @param issueKeys Issue keys to cache results for
+   * @param results Results to cache
+   */
+  function cacheResults(issueKeys: string[], results: JiraIssueInfo[]) {
+    try {
+      // Sort keys for cache storage
+      const cacheKey = [...issueKeys].sort().join(',');
+      // Store original order
+      localStorage.setItem(`jira-results-${cacheKey}`, JSON.stringify(results));
+      localStorage.setItem(`jira-order-${cacheKey}`, JSON.stringify(issueKeys));
+    } catch (error) {
+      console.error('Error writing to cache:', error);
+    }
+  }
+
+  /**
+   * Get the last queried issue keys
+   */
+  function getLastQueriedKeys(): string[] | null {
+    try {
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key && key.startsWith('jira-order-')) {
+          // Return the saved order instead of the cache key
+          const order = localStorage.getItem(key);
+          return order ? JSON.parse(order) : null;
+        }
+      }
+    } catch (error) {
+      console.error('Error getting last queried keys:', error);
+    }
+    return [];
+  }
+
+  /**
+   * Clear all cached results
+   */
+  function clearCache() {
+      const keysToRemove: string[] = [];
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key && (key.startsWith('jira-results-') || key.startsWith('jira-order-'))) {
+          keysToRemove.push(key);
+        }
+      }
+      keysToRemove.forEach(key => localStorage.removeItem(key));
+  }
+
+  async function fetchIssues(issueKeys: string[], useCache: boolean = true) {
     if (!isConfigured.value) {
       errorMessage.value = '请先配置JIRA连接信息';
       return;
     }
 
+    // Clear cache if not using it
+    if (!useCache) {
+      clearCache();
+    }
+
+    // Check cache first if using cache
+    if (useCache) {
+      const cached = getCachedResults(issueKeys);
+      if (cached) {
+        // Sort results according to original order
+        const resultMap = new Map(cached.results.map(result => [result.key, result]));
+        issueResults.value = cached.order.map(key => resultMap.get(key)!);
+        return;
+      }
+    }
+
     try {
       isLoading.value = true;
       errorMessage.value = null;
-      issueResults.value = await jiraService.getIssuesInfo(issueKeys);
+      // Get results from API
+      const results = await jiraService.getIssuesInfo(issueKeys);
+      
+      // Order results to match input order
+      const resultMap = new Map(results.map(result => [result.key, result]));
+      const orderedResults = issueKeys.map(key => resultMap.get(key)!);
+      
+      // Update state and cache
+      issueResults.value = orderedResults;
+      if (orderedResults.length > 0) {
+        cacheResults(issueKeys, orderedResults);
+      }
     } catch (error) {
       console.error('获取JIRA工单信息失败:', error);
       errorMessage.value = `获取JIRA信息失败: ${error instanceof Error ? error.message : '未知错误'}`;
@@ -95,11 +195,12 @@ export const useJiraStore = defineStore('jira', () => {
   }
 
   /**
-   * 清空结果
+   * 清空结果和缓存
    */
   function clearResults() {
     issueResults.value = [];
     errorMessage.value = null;
+    clearCache();
   }
 
   /**
@@ -132,6 +233,8 @@ export const useJiraStore = defineStore('jira', () => {
     loadConfig,
     fetchIssues,
     clearResults,
+    clearCache,
+    getLastQueriedKeys,
     logout
   };
-}); 
+});
