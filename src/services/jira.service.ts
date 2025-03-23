@@ -2,6 +2,7 @@
 // import JiraApi from 'jira-client';
 import axios from 'axios';
 import type { AxiosInstance } from 'axios';
+import jiraKeywords from '../../config/jira-keywords.config.json';
 
 // JIRA配置接口
 export interface JiraConfig {
@@ -20,24 +21,14 @@ export enum CommentType {
   VERIFICATION = 'VERIFICATION'
 }
 
-// 备注类型关键字映射
-export const CommentTypeKeywords: Record<CommentType, string[]> = {
-  [CommentType.TEST]: ['测试', '确认无误', '测试完成'],
-  [CommentType.REVIEW]: ['复核', '评审', '代码审查'],
-  [CommentType.APPROVAL]: ['同意', '批准', '确认通过'],
-  [CommentType.VERIFICATION]: ['验证', '复验', '确认验证']
-};
+// 从配置文件导入关键字映射
+export const CommentTypeKeywords: Record<CommentType, string[]> = jiraKeywords.commentTypeKeywords;
 
-// 备注类型显示名称
-export const CommentTypeDisplayNames: Record<CommentType, string> = {
-  [CommentType.TEST]: '测试',
-  [CommentType.REVIEW]: '复核',
-  [CommentType.APPROVAL]: '同意',
-  [CommentType.VERIFICATION]: '验证'
-};
+// 从配置文件导入显示名称
+export const CommentTypeDisplayNames: Record<CommentType, string> = jiraKeywords.commentTypeDisplayNames;
 
-// 增加描述关键字检查：问题描述、原因分析、解决方案
-export const DescriptionKeywords = ['问题描述', '原因分析', '解决方案'];
+// 从配置文件导入描述关键字
+export const DescriptionKeywords = jiraKeywords.descriptionKeywords;
 
 // JIRA工单信息接口
 export interface JiraIssueInfo {

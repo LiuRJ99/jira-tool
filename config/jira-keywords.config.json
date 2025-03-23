@@ -1,0 +1,15 @@
+{
+  "commentTypeKeywords": {
+    "TEST": ["测试", "确认无误", "测试完成"],
+    "REVIEW": ["复核", "评审", "代码审查"],
+    "APPROVAL": ["同意", "批准", "确认通过"],
+    "VERIFICATION": ["验证", "复验", "确认验证"]
+  },
+  "commentTypeDisplayNames": {
+    "TEST": "测试",
+    "REVIEW": "复核",
+    "APPROVAL": "同意",
+    "VERIFICATION": "验证"
+  },
+  "descriptionKeywords": ["问题描述", "原因分析", "解决方案"]
+}
