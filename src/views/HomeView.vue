@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue';
+import { ref, onMounted, computed, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { useJiraStore } from '@/stores/jira';
 import { CommentType, CommentTypeDisplayNames, DescriptionKeywords, CommentTypeKeywords } from '@/services/jira.service';
@@ -76,35 +76,69 @@ onMounted(async () => {
   }
 });
 
-  // 处理查询
-  async function handleQuery(forceRefresh: boolean = false) {
-    if (!issueInput.value.trim()) {
-      return;
-    }
+// 监听查询结果变化，自动选中相关的作者和关键字
+watch(() => jiraStore.issueResults, (newResults) => {
+  if (newResults.length > 0) {
+    // 重置选中状态
+    selectedAuthors.value = [];
+    selectedKeywords.value = [];
     
-    // 分割工单号（以逗号分隔）并去重
-    const issueKeys = [...new Set(
-      issueInput.value
-        .split(',')
-        .map(key => key.trim())
-        .filter(key => key !== '')
-    )];
+    // 收集所有评论
+    const allComments: string[] = [];
+    newResults.forEach(issue => {
+      Object.values(issue.comments).forEach(comments => {
+        allComments.push(...comments);
+      });
+    });
     
-    if (issueKeys.length === 0) {
-      return;
-    }
+    // 自动选中有评论的作者
+    const authors = newResults[0].commentAuthors;
+    authors.forEach(author => {
+      if (allComments.some(comment => comment.startsWith(`[${author.name}]`))) {
+        selectedAuthors.value.push(author.name);
+      }
+    });
     
-    // 更新输入框内容为去重后的工单号
-    issueInput.value = issueKeys.join(', ');
-    
-    // 发起查询，如果forceRefresh为true则不使用缓存
-    await jiraStore.fetchIssues(issueKeys, !forceRefresh);
+    // 自动选中使用的关键字
+    allKeywords.value.forEach(keyword => {
+      if (allComments.some(comment => comment.includes(keyword))) {
+        selectedKeywords.value.push(keyword);
+      }
+    });
+  }
+}, { immediate: true });
+
+// 处理查询
+async function handleQuery(forceRefresh: boolean = false) {
+  if (!issueInput.value.trim()) {
+    return;
+  }
+  
+  // 分割工单号（以逗号分隔）并去重
+  const issueKeys = [...new Set(
+    issueInput.value
+      .split(',')
+      .map(key => key.trim())
+      .filter(key => key !== '')
+  )];
+  
+  if (issueKeys.length === 0) {
+    return;
+  }
+  
+  // 更新输入框内容为去重后的工单号
+  issueInput.value = issueKeys.join(', ');
+  
+  // 发起查询，如果forceRefresh为true则不使用缓存
+  await jiraStore.fetchIssues(issueKeys, !forceRefresh);
 }
 
 // 清空结果
 function clearResults() {
   jiraStore.clearResults();
   issueInput.value = '';
+  selectedAuthors.value = [];
+  selectedKeywords.value = [];
 }
 
 // 注销
