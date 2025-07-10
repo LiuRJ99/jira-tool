@@ -479,3 +479,30 @@ h2 {
 .fade-leave-to {
   opacity: 0;
 }
+
+/* 为表格列设置固定宽度 */
+.results-table th,
+.results-table td {
+  width: 120px; /* 可根据需要调整具体宽度值 */
+  min-width: 120px;
+  max-width: 120px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* 为特定列设置不同宽度 */
+.results-table th:nth-child(1),
+.results-table td:nth-child(1) {
+  width: 100px; /* JIRA号列 */
+}
+
+.results-table th:nth-child(2),
+.results-table td:nth-child(2) {
+  width: 80px; /* 经办人列 */
+}
+
+.results-table th:nth-child(7),
+.results-table td:nth-child(7) {
+  width: 200px; /* 描述列 */
+}
