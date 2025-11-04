@@ -14,8 +14,8 @@ export default defineConfig(({ mode }) => {
   plugins: [
     vue(),
     vueJsx(),
-    vueDevTools(),
-  ],
+    // vueDevTools(), // 临时禁用以解决 localStorage 错误
+ ],
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url))
