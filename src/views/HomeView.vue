@@ -3,6 +3,7 @@ import { ref, onMounted, computed, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { useJiraStore } from '@/stores/jira';
 import { CommentType, CommentTypeDisplayNames, DescriptionKeywords, CommentTypeKeywords } from '@/services/jira.service';
+import PageAgentWidget from '@/pageAgent/components/PageAgentWidget.vue';
 
 const jiraStore = useJiraStore();
 const router = useRouter();
@@ -77,6 +78,7 @@ onMounted(async () => {
       await jiraStore.fetchIssues(lastQueriedKeys, true);
     }
   }
+
 });
 
 // 监听查询结果变化，自动选中相关的作者和关键字
@@ -436,6 +438,9 @@ const copyContentEmpty = ref(false);
     <div v-else-if="!jiraStore.isLoading" class="empty-state">
       <p>输入JIRA工单号并点击"查询"按钮获取信息</p>
     </div>
+
+    <!-- Page Agent Widget -->
+    <PageAgentWidget />
   </div>
 </template>
 

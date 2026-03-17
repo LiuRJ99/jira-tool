@@ -15,11 +15,16 @@
     "format": "prettier --write src/"
   },
   "dependencies": {
+    "@page-agent/llms": "^1.5.8",
+    "@page-agent/ui": "^1.5.8",
     "axios": "^1.8.4",
     "jira-client": "^8.2.2",
+    "lucide-vue-next": "^0.577.0",
+    "page-agent": "^1.5.8",
     "pinia": "^3.0.1",
     "vue": "^3.5.13",
-    "vue-router": "^4.5.0"
+    "vue-router": "^4.5.0",
+    "zod": "^4.3.6"
   },
   "devDependencies": {
     "@playwright/test": "^1.51.0",
