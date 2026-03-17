@@ -45,7 +45,7 @@ export function destroyPageAgent(): void {
 /**
  * 重新初始化
  */
-export function reinitializePageAgent(): void {
+export function reinitializePageAgent(): PageAgent {
   destroyPageAgent()
-  initPageAgent()
+  return initPageAgent()
 }

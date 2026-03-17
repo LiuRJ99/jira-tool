@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { usePageAgentStore } from '@/stores/pageAgent'
-import { getPageAgent } from '../agent'
+import { getPageAgent, reinitializePageAgent } from '../agent'
 import { Bot } from 'lucide-vue-next'
 
 const store = usePageAgentStore()
@@ -12,10 +12,27 @@ const isReady = computed(() => store.hasApiKey)
 // 显示官方面板
 function showPanel() {
   const agent = getPageAgent()
-  if (!agent) {
-    alert('PageAgent 未初始化，请先配置 LLM API')
+
+  // 检查 agent 是否存在且 panel 是否有效
+  if (!agent || !agent.panel) {
+    // agent 已被销毁，需要重新初始化
+    const newAgent = reinitializePageAgent()
+    if (!newAgent) {
+      alert('PageAgent 初始化失败，请检查 LLM 配置')
+      return
+    }
+    newAgent.panel.show()
     return
   }
+
+  // 检查 panel 的 wrapper 是否还在 DOM 中
+  if (!document.body.contains(agent.panel.wrapper)) {
+    // panel 的 wrapper 已被移除，需要重新初始化
+    reinitializePageAgent().panel.show()
+    return
+  }
+
+  // 正常显示面板
   agent.panel.show()
 }
 </script>
