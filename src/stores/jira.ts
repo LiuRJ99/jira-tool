@@ -19,12 +19,18 @@ export const useJiraStore = defineStore('jira', () => {
 
   // 动作
 
+  function isJiraLinkConfigChanged(previousConfig: JiraConfig, nextConfig: JiraConfig) {
+    return previousConfig.host !== nextConfig.host
+      || (previousConfig.protocol || 'https') !== (nextConfig.protocol || 'https');
+  }
+
   /**
    * 保存JIRA配置
    * @param newConfig 新的JIRA配置
    */
   async function saveConfig(newConfig: JiraConfig) {
     try {
+      const previousConfig = { ...config.value };
       config.value = { ...newConfig };
       
       // 初始化JIRA服务
@@ -38,6 +44,10 @@ export const useJiraStore = defineStore('jira', () => {
         
         // 保存到本地存储
         localStorage.setItem('jira-config', JSON.stringify(config.value));
+        if (isJiraLinkConfigChanged(previousConfig, config.value)) {
+          // 查询结果缓存包含 descriptionUrl，JIRA访问地址变化后必须清理旧链接。
+          clearCache();
+        }
         return true;
       } else {
         errorMessage.value = '连接JIRA服务器失败，请检查配置';

@@ -1,7 +1,7 @@
 // 移除jira-client导入，使用axios
 // import JiraApi from 'jira-client';
 import axios from 'axios';
-import type { AxiosInstance } from 'axios';
+import type { AxiosInstance, InternalAxiosRequestConfig } from 'axios';
 import jiraKeywords from '../../config/jira-keywords.config.json';
 
 // JIRA配置接口
@@ -63,12 +63,12 @@ export class JiraService {
     this.config = config;
     // 保存原始主机地址，用于构建JIRA页面URL
     this.originalHost = config.host;
-    
+
     // 使用代理URL而不是直接访问JIRA服务器
     this.jiraClient = axios.create({
       // 使用Vite代理前缀，不直接访问JIRA服务器
       baseURL: '/jira-api',
-      headers: { 
+      headers: {
         'Accept': 'application/json',
         'Content-Type': 'application/json'
       },
@@ -77,6 +77,18 @@ export class JiraService {
         username: config.username,
         password: config.password
       }
+    });
+    // 添加请求拦截器，记录详细请求信息
+    this.jiraClient.interceptors.request.use((requestConfig: InternalAxiosRequestConfig) => {
+      console.log('[请求拦截器] 完整URL:', `${requestConfig.baseURL || ''}${requestConfig.url || ''}`);
+      console.log('[请求拦截器] Headers:', requestConfig.headers);
+      console.log('[请求拦截器] Auth:', requestConfig.auth ? `${requestConfig.auth.username}:***` : '无');
+      return requestConfig;
+    });
+    console.log('[JIRA服务初始化] 配置:', {
+      host: config.host,
+      username: config.username,
+      baseURL: '/jira-api'
     });
   }
 
@@ -95,12 +107,20 @@ export class JiraService {
     const apiPath = `/rest/api/${apiVersion}${endpoint}`;
 
     try {
-      console.log(`发送请求到代理: ${apiPath}`);
+      console.log(`[API请求] 端点: ${apiPath}`);
       const response = await this.jiraClient.get(apiPath);
+      console.log(`[API响应] 状态: ${response.status}, 数据长度: ${JSON.stringify(response.data).length}`);
       return response.data;
     } catch (error: any) {
-      console.error('JIRA API请求错误:', error);
-      
+      console.error('[API错误] 详细信息:', {
+        message: error.message,
+        code: error.code,
+        status: error.response?.status,
+        statusText: error.response?.statusText,
+        headers: error.response?.headers,
+        data: error.response?.data
+      });
+
       // 提取详细错误信息
       if (error.response) {
         // 服务器响应了错误状态码
